@@ -1,0 +1,21 @@
+.container {
+  background-color: #8d8c8b;
+  display: flex;
+  align-items: center;
+  margin-top: 5;
+  height: 30;
+
+  img {
+    padding: 5;
+    padding-right: 0;
+    height: 20;
+    width: 20;
+  }
+  div {
+    padding-left: 5;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+}
