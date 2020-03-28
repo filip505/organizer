@@ -5,37 +5,68 @@ const fs = require('fs')
 let mainWindow
 let statusWindow
 let taskList = []
+let errorList = []
+
+const ERROR = {
+    FILE_EXISTS: { message: 'fileExists' }
+}
+
+const checkIfFileExsists = (file) => () => new Promise((resolve, redject) => {
+    if (fs.existsSync(file.newDirectory)) {
+        redject({ ...ERROR.FILE_EXISTS, file: file })
+    } else {
+        resolve()
+    }
+})
 
 const moveFileTask = (file) => () => new Promise((resolve, redject) => {
     // setTimeout(() => {
     //     console.log('done')
     //     resolve()
     // }, 1000)
-    fs.rename(file.oldDirectory, file.newDirectory, function (err) {
-        if (err) throw redject(err)
-        console.log('Successfully moved ' + file.name)
-        resolve()
+    checkIfFileExsists(file).then(() => {
+        fs.rename(file.oldDirectory, file.newDirectory, function (err) {
+            if (err) throw redject(err)
+            console.log('Successfully moved ' + file.name)
+            resolve()
+        }).catch((err) => console.log('greska', err))
     })
+
 })
 
 const copyFileTask = (file) => () => new Promise((resolve, redject) => {
-    fs.copyFile(file.oldDirectory, file.newDirectory, function (err) {
-        if (err) throw redject(err)
-        console.log('Successfully copied ' + file.name)
-        resolve()
-    })
+    checkIfFileExsists(file)().then(() => {
+        fs.copyFile(file.oldDirectory, file.newDirectory, function (err) {
+            if (err) {
+                redject(err)
+            }
+            console.log('Successfully copied ' + file.name)
+            resolve()
+        })
+    }).catch((err) => redject(err))
 })
 
 
 const runAllTasks = async (resolve, redject) => {
     while (taskList.length) {
         const task = taskList.pop()
-        await task.run()
+        try {
+            await task.run()
 
-        mainWindow.webContents.send(
-            'task:add',
-            taskList
-        )
+            mainWindow.webContents.send(
+                'task:add',
+                taskList
+            )
+        } catch (error) {
+            console.log('error', error)
+            if (ERROR.FILE_EXISTS.message == error.message) {
+                errorList.unshift(error)
+                mainWindow.webContents.send(
+                    'task:error',
+                    errorList
+                )
+            }
+        }
     }
 
     setTimeout(runAllTasks, 5000)
@@ -79,6 +110,7 @@ app.on('ready', () => {
 
 
 
+
     ipcMain.on('folder:move', (event, file) => {
         const name = `moving ${file.name} to ${file.newDirectory}`
         const run = moveFileTask(file)
@@ -87,7 +119,7 @@ app.on('ready', () => {
 
         mainWindow.webContents.send(
             'task:add',
-            taskList
+            taskList.map((task) => ({ name: task.name }))
         )
     })
 
@@ -99,7 +131,7 @@ app.on('ready', () => {
 
         mainWindow.webContents.send(
             'task:add',
-            taskList
+            taskList.map((task) => ({ name: task.name }))
         )
     })
 })

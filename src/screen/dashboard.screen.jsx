@@ -12,6 +12,7 @@ import ButtonComponent from '../component/ButtonComponent'
 import folderIcon from '../assets/folderIcon.png'
 import arrowRight from '../assets/arrowRight.png'
 import syncIcon from '../assets/syncIcon.png'
+import ErrorComponent from '../component/ErrorComponent'
 
 class DashboardComponent extends Component {
 
@@ -20,6 +21,7 @@ class DashboardComponent extends Component {
         this.state = {
             directories: [],
             tasks: [],
+            errors: [],
             file: null,
             files: null,
             error: null,
@@ -28,6 +30,10 @@ class DashboardComponent extends Component {
         }
         ipcRenderer.on('task:add', (event, tasks) => {
             this.setState({ tasks })
+        })
+        ipcRenderer.on('task:error', (event, errors) => {
+            console.log('ERROR', errors)
+            this.setState({ errors })
         })
 
         this.onFileSelected = (file, files) => {
@@ -78,15 +84,17 @@ class DashboardComponent extends Component {
             const files = this.state.files.filter((f) => f.name !== file.name)
             const activeFile = file.index > 0 ? files[file.index - 1] : null
             // ipcRenderer.send('task:add', file)
+            console.log('sending file', file)
+
             ipcRenderer.send('folder:move', file)
             this.onFileSelected(activeFile, files)
         }
 
         this.copyFile = (directory) => {
             const { file } = this.state
-            file.newDirectory = directory + '/' + file.name
-            file.oldDirectory = file.path
-            ipcRenderer.send('folder:copy', file)
+            // file.newDirectory = directory + '/' + file.name
+            // file.oldDirectory = file.path
+            ipcRenderer.send('folder:copy', { name: file.name, oldDirectory: file.path, newDirectory: directory + '/' + file.name })
         }
 
         document.onkeydown = (e) => {
@@ -147,6 +155,7 @@ class DashboardComponent extends Component {
 
                 <div>
                     {this.state.directories.map(({ path, action }) => this.renderDirectory(path, action))}
+                    {this.state.errors.map(error => <ErrorComponent error={error} />)}
                     {this.state.tasks.map(task => this.renderTask(task))}
                 </div>
             </div>
