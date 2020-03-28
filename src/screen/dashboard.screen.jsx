@@ -21,7 +21,13 @@ class DashboardComponent extends Component {
         this.state = {
             directories: [],
             tasks: [],
-            errors: [],
+            errors: [{
+                message: "fileExists",
+                file: {
+                    name: "75474046_2017110938444151_1442132164094197760_o.jpg",
+                    oldDirectory: "/Users/filip/Documents/cover/75474046_2017110938444151_1442132164094197760_o.jpg"
+                }
+            }],
             file: null,
             files: null,
             error: null,
@@ -31,9 +37,8 @@ class DashboardComponent extends Component {
         ipcRenderer.on('task:add', (event, tasks) => {
             this.setState({ tasks })
         })
-        ipcRenderer.on('task:error', (event, errors) => {
-            console.log('ERROR', errors)
-            this.setState({ errors })
+        ipcRenderer.on('task:error', (event, { errorList, taskList }) => {
+            this.setState({ errors: errorList, tasks: taskList })
         })
 
         this.onFileSelected = (file, files) => {
@@ -97,6 +102,10 @@ class DashboardComponent extends Component {
             ipcRenderer.send('folder:copy', { name: file.name, oldDirectory: file.path, newDirectory: directory + '/' + file.name })
         }
 
+        this.onError = (error) => {
+
+        }
+
         document.onkeydown = (e) => {
             if (e.keyCode == '38') {
 
@@ -155,7 +164,7 @@ class DashboardComponent extends Component {
 
                 <div>
                     {this.state.directories.map(({ path, action }) => this.renderDirectory(path, action))}
-                    {this.state.errors.map(error => <ErrorComponent error={error} />)}
+                    {this.state.errors.map(error => <ErrorComponent error={error} onClick={this.onError} />)}
                     {this.state.tasks.map(task => this.renderTask(task))}
                 </div>
             </div>

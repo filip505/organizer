@@ -63,7 +63,7 @@ const runAllTasks = async (resolve, redject) => {
                 errorList.unshift(error)
                 mainWindow.webContents.send(
                     'task:error',
-                    errorList
+                    { errorList, taskList }
                 )
             }
         }
