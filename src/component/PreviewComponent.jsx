@@ -1,6 +1,7 @@
 import React from 'react'
 import ph from 'path'
 import style from '../css/preview.component.scss'
+import fileIcon from '../assets/fileIcon.png'
 
 const supportedFormats = {
     image: [
@@ -23,22 +24,29 @@ const supportedFormats = {
     video: [
         '.mp4',
         '.webm',
-        '.ogg'
+        '.ogg',
+        '.mov'
     ]
 }
 
 
 const renderPhoto = (file, active, onClick) => (
-    <div className={active && active.name===file.name? style.containerActive: style.container}>
+    <div className={active && active.name === file.name ? style.containerActive : style.container}>
         <img onClick={() => onClick(file)} style={{ width: '100%', height: 'auto', objectFit: 'contain' }} src={file.path} />
     </div>
 )
 
 const renderVideo = (file, active, onClick) => (
-    <div className={active && active.name===file.name? style.containerActive: style.container}>
+    <div className={active && active.name === file.name ? style.containerActive : style.container}>
         <video onClick={() => onClick(file)} width="100%" height="auto">
             <source src={file.path} />
         </video>
+    </div >
+)
+
+const renderFile = (file, active, onClick) => (
+    <div onClick={() => onClick(file)} className={active && active.name === file.name ? style.containerActive : style.container}>
+        <img src={fileIcon} />
     </div >
 )
 
@@ -54,6 +62,6 @@ export default function ({ file, active, onClick }) {
         return renderVideo(file, active, onClick)
     }
     else {
-        return null
+        return renderFile(file, active, onClick)
     }
 }

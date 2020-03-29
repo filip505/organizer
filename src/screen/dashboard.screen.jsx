@@ -14,6 +14,7 @@ import arrowRight from '../assets/arrowRight.png'
 import syncIcon from '../assets/syncIcon.png'
 import copyIcon from '../assets/copyIcon.png'
 import ErrorComponent from '../component/ErrorComponent'
+import deleteIcon from '../assets/deleteIcon.png'
 
 const icons = {
     moveFile: folderIcon,
@@ -208,8 +209,8 @@ class DashboardComponent extends Component {
                     </div>
                 </div>
                 <ButtonComponent
-                        title={'Delete...'}
-                        icons={[folderIcon]}
+                        title={'Delete'}
+                        icons={[deleteIcon]}
                         onClick={this.deleteFile} />
             </div>
         )
