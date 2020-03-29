@@ -12,31 +12,41 @@ const ERROR = {
 }
 
 const checkIfFileExsists = (file) => () => new Promise((resolve, redject) => {
-    if (fs.existsSync(file.newDirectory)) {
+    if (fs.existsSync(file.newDirectory + '/' + file.name)) {
         redject({ ...ERROR.FILE_EXISTS, file: file })
     } else {
         resolve()
     }
 })
 
+const deleteFileTask = (file) => () => new Promise((resolve, redject) => {
+    fs.unlink(file.oldDirectory, function (err) {
+        if (err) {
+            redject(err)
+        }
+        console.log('Successfully deleted ' + file.name)
+        resolve()
+    })
+})
+
 const moveFileTask = (file) => () => new Promise((resolve, redject) => {
-    // setTimeout(() => {
-    //     console.log('done')
-    //     resolve()
-    // }, 1000)
-    checkIfFileExsists(file).then(() => {
-        fs.rename(file.oldDirectory, file.newDirectory, function (err) {
-            if (err) throw redject(err)
+    checkIfFileExsists(file)().then(() => {
+        fs.rename(file.oldDirectory, file.newDirectory + '/' + file.name, function (err) {
+            if (err) {
+                redject(err)
+            }
             console.log('Successfully moved ' + file.name)
             resolve()
-        }).catch((err) => console.log('greska', err))
+        })
+    }).catch((err) => {
+        redject(err)
     })
 
 })
 
 const copyFileTask = (file) => () => new Promise((resolve, redject) => {
     checkIfFileExsists(file)().then(() => {
-        fs.copyFile(file.oldDirectory, file.newDirectory, function (err) {
+        fs.copyFile(file.oldDirectory, file.newDirectory + '/' + file.name, function (err) {
             if (err) {
                 redject(err)
             }
@@ -58,7 +68,6 @@ const runAllTasks = async (resolve, redject) => {
                 taskList
             )
         } catch (error) {
-            console.log('error', error)
             if (ERROR.FILE_EXISTS.message == error.message) {
                 errorList.unshift(error)
                 mainWindow.webContents.send(
@@ -109,9 +118,21 @@ app.on('ready', () => {
     // })
 
 
+    ipcMain.on('folder:delete', (event, { file, errors }) => {
+        errorList = errors
+        const name = `deleting ${file.name}`
+        const run = deleteFileTask(file)
+        const task = { name, run }
+        taskList.unshift(task)
 
+        mainWindow.webContents.send(
+            'task:add',
+            taskList.map((task) => ({ name: task.name }))
+        )
+    })
 
-    ipcMain.on('folder:move', (event, file) => {
+    ipcMain.on('folder:move', (event, { file, errors }) => {
+        errorList = errors
         const name = `moving ${file.name} to ${file.newDirectory}`
         const run = moveFileTask(file)
         const task = { name, run }
@@ -123,7 +144,8 @@ app.on('ready', () => {
         )
     })
 
-    ipcMain.on('folder:copy', (event, file) => {
+    ipcMain.on('folder:copy', (event, { file, errors }) => {
+        errorList = errors
         const name = `copying ${file.name} to ${file.newDirectory}`
         const run = copyFileTask(file)
         const task = { name, run }

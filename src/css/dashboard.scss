@@ -28,37 +28,44 @@
   background-color: #433f3c;
   color: #fff;
   overflow: scroll;
-  padding: 10px;
-  .info {
-    color: #8d8c8b;
-    .data {
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    border-style: solid;
-    border-color: #8d8c8b;
-    border-width: 0px;
-    border-bottom-width: 1px;
-  }
-  .task {
-    background-color: #405d9b;
-    display: flex;
-    align-items: center;
-    margin-top: 5;
-    height: 30;
 
-    img {
-      padding: 5;
-      padding-right: 0;
-      height: 20;
-      width: 20;
+  .rightPanelContainer {
+    display: flex;
+    justify-content: space-between;
+    flex-direction: column;
+    padding: 10px;
+    height: calc(100vh - 20px);
+    .info {
+      color: #8d8c8b;
+      border-style: solid;
+      border-color: #8d8c8b;
+      border-width: 0px;
+      border-bottom-width: 1px;
+      .data {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
     }
-    div {
-      padding-left: 5;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+    .task {
+      background-color: #405d9b;
+      display: flex;
+      align-items: center;
+      margin-top: 5;
+      height: 30;
+
+      img {
+        padding: 5;
+        padding-right: 0;
+        height: 20;
+        width: 20;
+      }
+      div {
+        padding-left: 5;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
     }
   }
 }
