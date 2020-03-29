@@ -1,0 +1,22 @@
+.container {
+  background-color: #433f3c;
+  color: #fff;
+  height: 100vh;
+
+  overflow: hidden;
+
+  .item {
+    margin: 10px;
+    height: calc(100vh - 25px);
+    border: 5;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-style: dashed;
+    cursor: pointer;
+  }
+
+  .item:hover {
+    background-color: #8d8c8b;
+  }
+}
