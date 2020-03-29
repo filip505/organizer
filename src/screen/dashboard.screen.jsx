@@ -10,31 +10,27 @@ import fs from 'fs'
 import ph from 'path'
 import ButtonComponent from '../component/ButtonComponent'
 import folderIcon from '../assets/folderIcon.png'
-import arrowRight from '../assets/arrowRight.png'
 import syncIcon from '../assets/syncIcon.png'
-import copyIcon from '../assets/copyIcon.png'
 import ErrorComponent from '../component/ErrorComponent'
 import deleteIcon from '../assets/deleteIcon.png'
+import DirectoryComponent from '../component/DirectoryComponent'
 
-const icons = {
-    moveFile: folderIcon,
-    copyFile: copyIcon
-}
+// const error = {
+//     message: "fileExists",
+//     file: {
+//         name: "75474046_2017110938444151_1442132164094197760_o.jpg",
+//         oldDirectory: "/Users/filip/Documents/cover/75474046_2017110938444151_1442132164094197760_o.jpg"
+//     }
+// }
 
 class DashboardComponent extends Component {
 
     constructor(props) {
         super(props)
         this.state = {
+            // directories: [{ path: '/Users/filip/Documents/test/untitled' }],
             directories: [],
             tasks: [],
-            // errors: [{
-            //     message: "fileExists",
-            //     file: {
-            //         name: "75474046_2017110938444151_1442132164094197760_o.jpg",
-            //         oldDirectory: "/Users/filip/Documents/cover/75474046_2017110938444151_1442132164094197760_o.jpg"
-            //     }
-            // }],
             errors: [],
             file: null,
             files: null,
@@ -50,6 +46,7 @@ class DashboardComponent extends Component {
         })
 
         this.onFileSelected = (file, files) => {
+            console.log('CLICK', file)
             if (file) {
                 fs.stat(file.path, (err, stats) => {
                     file = { ...file, ...stats }
@@ -85,14 +82,16 @@ class DashboardComponent extends Component {
             }
         }
 
-        this.selectFolder = (action) => {
+        this.selectFolder = () => {
             const { dialog } = remote
             dialog.showOpenDialog({
-                properties: ['openDirectory']
+                properties: ['openDirectory', 'multiSelections']
             }).then(result => {
                 if (!result.canceled) {
                     const directories = this.state.directories
-                    directories.push({ path: result.filePaths[0], action })
+                    for (let path of result.filePaths) {
+                        directories.push({ path })
+                    }
                     this.setState({ directories })
                 }
             }).catch(err => {
@@ -101,6 +100,7 @@ class DashboardComponent extends Component {
         }
 
         this.moveFile = (directory) => {
+            console.log('moveFile')
             const { file } = this.state
             file.newDirectory = directory
             file.oldDirectory = file.path
@@ -111,6 +111,7 @@ class DashboardComponent extends Component {
         }
 
         this.copyFile = (directory) => {
+            console.log('copyFile')
             const { file } = this.state
             file.newDirectory = directory
             file.oldDirectory = file.path
@@ -163,23 +164,12 @@ class DashboardComponent extends Component {
         )
     }
 
-    renderDirectory(directory, action) {
-        // ReactDOM.createPortal(this.props.children, window.open('').document.body)
-        console.log('action', action)
-        return <ButtonComponent
-            key={directory}
-            title={directory}
-            icons={[arrowRight, icons[action]]}
-            onClick={() => this[action](directory)} />
-    }
-
-
     renderRightPanel(file) {
         const formatBytes = (a, b) => { if (0 == a) return "0 Bytes"; var c = 1024, d = b || 2, e = ["Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"], f = Math.floor(Math.log(a) / Math.log(c)); return parseFloat((a / Math.pow(c, f)).toFixed(d)) + " " + e[f] }
         file = file ? file : {}
         return (
             <div className={style.rightPanelContainer}>
-                <div>
+                <div className={style.top}>
                     <div className={style.info}>
                         <div className={style.data}><b>Name: </b>{file.path ? ph.basename(file.path) : ''}</div>
                         <div className={style.data}><b>Created At: </b>{file.atime ? file.atime.toLocaleString() : ''}</div>
@@ -188,17 +178,12 @@ class DashboardComponent extends Component {
 
 
                     <ButtonComponent
-                        title={'Move to...'}
+                        title={'Add folder...'}
                         icons={[folderIcon]}
-                        onClick={() => this.selectFolder('moveFile')} />
+                        onClick={this.selectFolder} />
 
-                    <ButtonComponent
-                        title={'Copy to...'}
-                        icons={[folderIcon]}
-                        onClick={() => this.selectFolder('copyFile')} />
-
-                    <div>
-                        {this.state.directories.map(({ path, action }) => this.renderDirectory(path, action))}
+                    <div style={{overflow: 'scroll'}}>
+                        {this.state.directories.map(({ path }) => <DirectoryComponent path={path} onCopy={() => this.copyFile(path)} onMove={() => this.moveFile(path)} />)}
                         {this.state.errors.map((error, index) => <ErrorComponent
                             key={index}
                             error={error}
@@ -209,9 +194,9 @@ class DashboardComponent extends Component {
                     </div>
                 </div>
                 <ButtonComponent
-                        title={'Delete'}
-                        icons={[deleteIcon]}
-                        onClick={this.deleteFile} />
+                    title={'Delete'}
+                    icons={[deleteIcon]}
+                    onClick={this.deleteFile} />
             </div>
         )
 

@@ -2,12 +2,15 @@
   background-color: #882323;
   margin-top: 5;
 
-
+  .title:hover{
+    background-color: #966767;
+    cursor: pointer;
+  }
   .title {
     display: flex;
     align-items: center;
     padding: 5;
-      height: 30;
+    height: 20;
     img {
       height: 20;
       width: 20;
@@ -20,7 +23,8 @@
     }
   }
 
-  .details{
+  .details {
+    cursor: pointer;
     padding: 5;
     background-color: #966767;
     height: 40;
@@ -32,3 +36,4 @@
     }
   }
 }
+

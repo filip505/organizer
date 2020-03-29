@@ -36,8 +36,8 @@ const renderPhoto = (file) => (
 
 const renderVideo = (file) => (
     <div>
-        <video style={{ width: '100%', height: '100%', objectFit: 'contain' }} controls>
-            <source src={file.path} />
+        <video style={{ width: '100%', height: '100%', objectFit: 'contain' }} controls src={file.path}>
+         
         </video>
     </div >
 )
@@ -50,12 +50,13 @@ const renderFile = (file) => (
 
 export default function ({ file }) {
     const extname = ph.extname(file.name)
-
+   
     if (supportedFormats.image.includes(extname)) {
         return renderPhoto(file)
     }
 
     else if (supportedFormats.video.includes(extname)) {
+        console.log('FILE', file)
         return renderVideo(file)
     }
     else {
