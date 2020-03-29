@@ -4,6 +4,7 @@ Enables simple and fast copying, moving and deleting files from one directory to
 Created with React, powered by Electron
 
 ![](video.gif)
+
 Download: [link](https://www.dropbox.com/s/n3tjxx9futt9jpp/organizer.zip?dl=0)
 
 ### Run:
